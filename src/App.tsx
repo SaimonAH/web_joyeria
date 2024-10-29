@@ -1,26 +1,62 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import VendedorDashboard from './pages/VendedorDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import UserAdministration from './pages/UserAdministration';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminUserManagement from './pages/AdminUserManagement';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        
+        {/* Vendor Routes */}
+        <Route 
+          path="/vendedor/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['vendedor']}>
+              <VendedorDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/vendedor/user-administration" 
+          element={
+            <ProtectedRoute allowedRoles={['vendedor']}>
+              <UserAdministration />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Admin Routes */}
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/user-administration" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminUserManagement/>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Redirect root to login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Catch-all route for undefined paths */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;

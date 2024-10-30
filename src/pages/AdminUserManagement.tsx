@@ -10,7 +10,7 @@ import axios from 'axios';
 
 const PageContainer = styled.div`
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   background-color: ${theme.colors.background};
 `;
 

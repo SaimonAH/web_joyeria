@@ -10,7 +10,7 @@ import axios from 'axios';
 
 const PageContainer = styled.div`
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   background-color: ${theme.colors.background};
 `;
 
@@ -72,7 +72,6 @@ const Form = styled.form`
 
 const FormGroup = styled.div`
   margin-bottom: 20px;
-  padding-right: 20px;
 `;
 
 const Label = styled.label`
@@ -309,7 +308,7 @@ const UserAdministration: React.FC = () => {
     }
   };
 
-  const handleEditUser = (user: Usuario) => {
+  const handleEditUser = async (user: Usuario) => {
     if (selectedUser && selectedUser.id === user.id) {
       setSelectedUser(null);
       clearForm();
@@ -321,6 +320,7 @@ const UserAdministration: React.FC = () => {
       setImagen(null);
       setImagenPreview(user.imagen_url || null);
     }
+    await fetchUsuarios();
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -328,7 +328,7 @@ const UserAdministration: React.FC = () => {
       try {
         await eliminarUsuario(userId);
         alert('Usuario eliminado exitosamente');
-        fetchUsuarios();
+        await fetchUsuarios();
       } catch (error) {
         console.error('Error al eliminar el usuario:', error);
         alert('Error al eliminar el usuario');
@@ -361,9 +361,12 @@ const UserAdministration: React.FC = () => {
     setSelectedUser(null);
   };
 
-  const handleTabChange = (tab: 'crear' | 'editar') => {
+  const handleTabChange = async (tab: 'crear' | 'editar') => {
     setActiveTab(tab);
     clearForm();
+    if (tab === 'editar') {
+      await fetchUsuarios();
+    }
   };
 
   const renderForm = (user: Usuario | null = null) => (

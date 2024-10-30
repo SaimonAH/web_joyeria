@@ -12,7 +12,16 @@ const SidebarContainer = styled.div`
   padding: 20px;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
+`;
+
+const CenteredContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 30px;
 `;
 
 const TopSpacer = styled.div`
@@ -98,6 +107,8 @@ const Sidebar: React.FC<SidebarProps> = ({ userInfo }) => {
 
   return (
     <SidebarContainer>
+      <CenteredContent>
+
       <TopSpacer />
       <ProfileSection>
         <UserRole>{userInfo?.rol || "Usuario"}</UserRole>
@@ -122,6 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userInfo }) => {
           <MenuItemText>Cerrar sesión</MenuItemText>
         </MenuItem>
       </MenuSection>
+      </CenteredContent>
     </SidebarContainer>
   );
 };

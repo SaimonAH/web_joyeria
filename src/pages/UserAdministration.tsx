@@ -72,6 +72,7 @@ const Form = styled.form`
 
 const FormGroup = styled.div`
   margin-bottom: 20px;
+  margin-right: 23px
 `;
 
 const Label = styled.label`

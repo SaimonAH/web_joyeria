@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../services/auth';
-import { theme } from '../styles/theme';
+import React, { useState, useEffect } from "react";
+import styled, { keyframes } from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { login } from "../services/auth";
+import { theme } from "../styles/theme";
+import SplashScreen from "../components/SplashScreen";
 
 const LoginContainer = styled.div`
   display: flex;
@@ -13,9 +14,21 @@ const LoginContainer = styled.div`
   background-color: ${theme.colors.background};
 `;
 
+const breatheAnimation = keyframes`
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.07);
+  }
+`;
+
 const Logo = styled.img`
-  width: 250px;
+  width: 180px;
   margin-bottom: 30px;
+  animation: ${breatheAnimation} 3s ease-in-out infinite;
 `;
 
 const LoginForm = styled.form`
@@ -65,37 +78,47 @@ const ErrorMessage = styled.p`
 `;
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
       const { token, usuario } = await login(email, password);
-      localStorage.setItem('token', token);
-      localStorage.setItem('userRole', usuario.rol);
-      localStorage.setItem('userId', usuario.id);
-      localStorage.setItem('userInfo', JSON.stringify(usuario));
+      localStorage.setItem("token", token);
+      localStorage.setItem("userRole", usuario.rol);
+      localStorage.setItem("userId", usuario.id);
+      localStorage.setItem("userInfo", JSON.stringify(usuario));
 
-      if (usuario.rol === 'vendedor') {
-        navigate('/vendedor/dashboard');
-      } else if (usuario.rol === 'admin') {
-        navigate('/admin/dashboard');
+      if (usuario.rol === "vendedor") {
+        navigate("/vendedor/dashboard");
+      } else if (usuario.rol === "admin") {
+        navigate("/admin/dashboard");
       } else {
-        setError('Rol de usuario no autorizado');
+        setError("Rol de usuario no autorizado");
       }
     } catch (err) {
-      setError('Credenciales inválidas. Por favor, intente de nuevo.');
+      setError("Credenciales inválidas. Por favor, intente de nuevo.");
     }
   };
 
+  if (loading) {
+    return <SplashScreen />;
+  }
+
   return (
     <LoginContainer>
-      <Logo src="/images/Logoweb.png" alt="Fonelli Joyería Fina" />
+      <Logo src="/favicon.ico" alt="Fonelli Joyería Fina" />
       <LoginForm onSubmit={handleSubmit}>
         <Title>Iniciar Sesión</Title>
         <Input

@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
-import OrderItem from './OrderItem';
-import { theme } from '../styles/theme';
+import React from "react";
+import styled from "styled-components";
+import OrderItem from "./OrderItem";
+import { theme } from "../styles/theme";
 
 const ListContainer = styled.div`
   display: flex;
@@ -18,7 +18,7 @@ const EmptyMessage = styled.p`
 
 interface Order {
   id: string;
-  estado: 'solicitado' | 'descargado' | 'capturado';
+  estado: "solicitado" | "descargado" | "capturado";
   modelo: string;
   numero_piezas: number;
   talla: string;
@@ -34,23 +34,27 @@ interface Order {
 
 interface OrderListProps {
   orders: Order[];
-  status: 'solicitado' | 'descargado' | 'capturado';
+  status: "solicitado" | "descargado" | "capturado";
   onOrderUpdate: () => void;
 }
 
-const OrderList: React.FC<OrderListProps> = ({ orders, status, onOrderUpdate }) => {
+const OrderList: React.FC<OrderListProps> = ({
+  orders,
+  status,
+  onOrderUpdate,
+}) => {
   if (orders.length === 0) {
     return <EmptyMessage>No hay pedidos en este estado.</EmptyMessage>;
   }
 
   return (
     <ListContainer>
-      {orders.map(order => (
-        <OrderItem 
-          key={order.id} 
-          order={order} 
-          status={status} 
-          onUpdate={onOrderUpdate} 
+      {orders.map((order) => (
+        <OrderItem
+          key={order.id}
+          order={order}
+          status={status}
+          onUpdate={onOrderUpdate}
         />
       ))}
     </ListContainer>

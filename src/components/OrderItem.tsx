@@ -1,10 +1,10 @@
-import React from 'react';
-import styled from 'styled-components';
-import { jsPDF } from 'jspdf';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import { updateOrderStatus } from '../services/api';
-import { theme } from '../styles/theme';
+import React from "react";
+import styled from "styled-components";
+import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { updateOrderStatus } from "../services/api";
+import { theme } from "../styles/theme";
 
 const OrderContainer = styled.div`
   background-color: ${theme.colors.white};
@@ -34,9 +34,10 @@ const OrderTitle = styled.h3`
   margin: 0;
 `;
 
-const OrderStatus = styled.span`
+const OrderStatus = styled.span<{ useGray?: boolean }>`
   font-size: 16px;
-  color: ${theme.colors.error};
+  color: ${(props) =>
+    props.useGray === true ? theme.colors.text : theme.colors.error};
   margin-left: 10px;
 `;
 
@@ -143,7 +144,7 @@ const ActionLink = styled.button`
 
 interface Order {
   id: string;
-  estado: 'solicitado' | 'descargado' | 'capturado';
+  estado: "solicitado" | "descargado" | "capturado";
   modelo: string;
   numero_piezas: number;
   talla: string;
@@ -159,17 +160,19 @@ interface Order {
 
 interface OrderItemProps {
   order: Order;
-  status: 'solicitado' | 'descargado' | 'capturado';
+  status: "solicitado" | "descargado" | "capturado";
   onUpdate: () => void;
 }
 
 export default function OrderItem({ order, status, onUpdate }: OrderItemProps) {
-  const handleStatusChange = async (newStatus: 'solicitado' | 'descargado' | 'capturado') => {
+  const handleStatusChange = async (
+    newStatus: "solicitado" | "descargado" | "capturado"
+  ) => {
     try {
       await updateOrderStatus(order.id, newStatus);
       onUpdate();
     } catch (error) {
-      console.error('Error al actualizar el estado del pedido:', error);
+      console.error("Error al actualizar el estado del pedido:", error);
     }
   };
 
@@ -187,7 +190,7 @@ export default function OrderItem({ order, status, onUpdate }: OrderItemProps) {
     doc.text(`Piedra: ${order.piedra}`, 10, 100);
     doc.text(`Largo: ${order.largo}`, 10, 110);
     doc.text(`Observaciones: ${order.observaciones}`, 10, 120);
-    doc.text(`Cancelado: ${order.cancelado ? 'Sí' : 'No'}`, 10, 130);
+    doc.text(`Cancelado: ${order.cancelado ? "Sí" : "No"}`, 10, 130);
     return doc;
   };
 
@@ -200,13 +203,18 @@ export default function OrderItem({ order, status, onUpdate }: OrderItemProps) {
     const worksheet = XLSX.utils.json_to_sheet([order]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Pedido");
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const data = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     saveAs(data, `pedido_${order.id}.xlsx`);
   };
 
   const handleDownloadFolio = () => {
-    handleStatusChange('descargado');
+    handleStatusChange("descargado");
   };
 
   return (
@@ -214,6 +222,11 @@ export default function OrderItem({ order, status, onUpdate }: OrderItemProps) {
       <OrderContent>
         <OrderHeader>
           <OrderTitle>Pedido - ID {order.id}</OrderTitle>
+          {
+            <OrderStatus useGray={!order.cancelado}>
+              ({order.estado})
+            </OrderStatus>
+          }
           {order.cancelado && <OrderStatus>(Cancelado)</OrderStatus>}
         </OrderHeader>
         <OrderTable>
@@ -222,19 +235,19 @@ export default function OrderItem({ order, status, onUpdate }: OrderItemProps) {
           <TableHeader>Talla</TableHeader>
           <TableHeader>Kilataje</TableHeader>
           <TableHeader>Color</TableHeader>
-          
+
           <TableCell>{order.modelo}</TableCell>
           <TableCell>{order.numero_piezas}</TableCell>
           <TableCell>{order.talla}</TableCell>
           <TableCell>{order.kilataje}</TableCell>
           <TableCell>{order.color}</TableCell>
-          
+
           <TableHeader>Inicial</TableHeader>
           <TableHeader>Nombre</TableHeader>
           <TableHeader>Piedra</TableHeader>
           <TableHeader>Largo</TableHeader>
           <TableHeader>Observaciones</TableHeader>
-          
+
           <TableCell>{order.inicial}</TableCell>
           <TableCell>{order.nombre_pedido}</TableCell>
           <TableCell>{order.piedra}</TableCell>
@@ -244,20 +257,24 @@ export default function OrderItem({ order, status, onUpdate }: OrderItemProps) {
       </OrderContent>
       <ButtonContainer>
         <ActionContainer>
-          {status === 'solicitado' && (
+          {status === "solicitado" && (
             <ActionLink onClick={handleDownloadFolio}>
               Descargar folio
             </ActionLink>
           )}
-          {status === 'descargado' && (
-            <ActionLink onClick={() => handleStatusChange('capturado')}>
+          {status === "descargado" && (
+            <ActionLink onClick={() => handleStatusChange("capturado")}>
               Capturar pedido
             </ActionLink>
           )}
         </ActionContainer>
         <ButtonGroup>
-          <PrimaryButton onClick={handleDownloadPDF}>Descargar PDF</PrimaryButton>
-          <SecondaryButton onClick={handleDownloadXLSX}>Descargar XLSX</SecondaryButton>
+          <PrimaryButton onClick={handleDownloadPDF}>
+            Descargar PDF
+          </PrimaryButton>
+          <SecondaryButton onClick={handleDownloadXLSX}>
+            Descargar XLSX
+          </SecondaryButton>
         </ButtonGroup>
       </ButtonContainer>
     </OrderContainer>

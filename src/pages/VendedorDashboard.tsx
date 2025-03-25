@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import Sidebar from '../components/Sidebar';
-import OrderList from '../components/OrderList';
-import { isAuthenticated, getUserInfo } from '../services/auth';
-import { getVendorOrders } from '../services/api';
-import { theme } from '../styles/theme';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import Sidebar from "../components/Sidebar";
+import OrderList from "../components/OrderList";
+import { isAuthenticated, getUserInfo } from "../services/auth";
+import { getVendorOrders } from "../services/api";
+import { theme } from "../styles/theme";
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -48,14 +48,16 @@ const TabContainer = styled.div`
 const Tab = styled.button<{ $active: boolean }>`
   font-size: 1rem;
   padding: 15px 30px;
-  background-color: ${props => props.$active ? theme.colors.primary : 'transparent'};
-  color: ${props => props.$active ? theme.colors.white : theme.colors.text};
+  background-color: ${(props) =>
+    props.$active ? theme.colors.primary : "transparent"};
+  color: ${(props) => (props.$active ? theme.colors.white : theme.colors.text)};
   border: none;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
-  font-weight: ${props => props.$active ? 'bold' : 'normal'};
+  font-weight: ${(props) => (props.$active ? "bold" : "normal")};
   &:hover {
-    background-color: ${props => props.$active ? theme.colors.primary : theme.colors.gray};
+    background-color: ${(props) =>
+      props.$active ? theme.colors.primary : theme.colors.gray};
   }
 `;
 
@@ -68,7 +70,7 @@ const ErrorMessage = styled.div`
 
 interface Order {
   id: string;
-  estado: 'solicitado' | 'descargado' | 'capturado';
+  estado: "solicitado" | "descargado" | "capturado";
   modelo: string;
   numero_piezas: number;
   talla: string;
@@ -83,7 +85,9 @@ interface Order {
 }
 
 const VendedorDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'solicitado' | 'descargado' | 'capturado'>('solicitado');
+  const [activeTab, setActiveTab] = useState<
+    "solicitado" | "descargado" | "capturado" | "historial"
+  >("solicitado");
   const [orders, setOrders] = useState<Order[]>([]);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -91,14 +95,16 @@ const VendedorDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/login');
+      navigate("/login");
     } else {
       const storedUserInfo = getUserInfo();
       if (storedUserInfo) {
         setUserInfo(storedUserInfo);
         fetchOrders(storedUserInfo.id);
       } else {
-        setError('No se encontró la información del usuario. Por favor, inicie sesión nuevamente.');
+        setError(
+          "No se encontró la información del usuario. Por favor, inicie sesión nuevamente."
+        );
       }
     }
   }, [navigate]);
@@ -112,14 +118,23 @@ const VendedorDashboard: React.FC = () => {
   const fetchOrders = async (vendorId: string) => {
     try {
       const vendorOrders = await getVendorOrders(vendorId);
-      setOrders(vendorOrders.filter((order: Order) => order.estado === activeTab));
+      // Si estamos en la pestaña historial, no aplicamos filtro por estado.
+      const filteredOrders =
+        activeTab === "historial"
+          ? vendorOrders
+          : vendorOrders.filter((order: Order) => order.estado === activeTab);
+      setOrders(filteredOrders);
     } catch (error) {
-      console.error('Error al obtener los pedidos:', error);
-      setError('No se pudieron cargar los pedidos. Por favor, intente de nuevo más tarde.');
+      console.error("Error al obtener los pedidos:", error);
+      setError(
+        "No se pudieron cargar los pedidos. Por favor, intente de nuevo más tarde."
+      );
     }
   };
 
-  const handleTabChange = (tab: 'solicitado' | 'descargado' | 'capturado') => {
+  const handleTabChange = (
+    tab: "solicitado" | "descargado" | "capturado" | "historial"
+  ) => {
     setActiveTab(tab);
   };
 
@@ -140,14 +155,35 @@ const VendedorDashboard: React.FC = () => {
         </Header>
         <Title>Panel de Vendedor</Title>
         <TabContainer>
-          <Tab $active={activeTab === 'solicitado'} onClick={() => handleTabChange('solicitado')}>Solicitado</Tab>
-          <Tab $active={activeTab === 'descargado'} onClick={() => handleTabChange('descargado')}>Descargado</Tab>
-          <Tab $active={activeTab === 'capturado'} onClick={() => handleTabChange('capturado')}>Capturado</Tab>
+          <Tab
+            $active={activeTab === "solicitado"}
+            onClick={() => handleTabChange("solicitado")}
+          >
+            Solicitado
+          </Tab>
+          <Tab
+            $active={activeTab === "descargado"}
+            onClick={() => handleTabChange("descargado")}
+          >
+            Descargado
+          </Tab>
+          <Tab
+            $active={activeTab === "capturado"}
+            onClick={() => handleTabChange("capturado")}
+          >
+            Capturado
+          </Tab>
+          <Tab
+            $active={activeTab === "historial"}
+            onClick={() => handleTabChange("historial")}
+          >
+            Historial
+          </Tab>
         </TabContainer>
-        <OrderList 
+        <OrderList
           orders={orders}
-          status={activeTab} 
-          onOrderUpdate={() => fetchOrders(userInfo.id)} 
+          status={activeTab !== "historial" ? activeTab : "capturado"}
+          onOrderUpdate={() => fetchOrders(userInfo.id)}
         />
       </MainContent>
     </DashboardContainer>

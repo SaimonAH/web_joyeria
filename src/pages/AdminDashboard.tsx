@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import Sidebar from '../components/Sidebar';
-import { isAuthenticated, getUserInfo } from '../services/auth';
-import { obtenerPedidos, eliminarPedido, updateOrderStatus, cancelarPedido, reactivarPedido } from '../services/api';
-import { theme } from '../styles/theme';
-import { ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import Sidebar from "../components/Sidebar";
+import { isAuthenticated, getUserInfo } from "../services/auth";
+import {
+  obtenerPedidos,
+  eliminarPedido,
+  updateOrderStatus,
+  cancelarPedido,
+  reactivarPedido,
+} from "../services/api";
+import { theme } from "../styles/theme";
+import { ChevronDown } from "lucide-react";
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -48,14 +54,16 @@ const TabContainer = styled.div`
 const Tab = styled.button<{ $active: boolean }>`
   font-size: 1rem;
   padding: 15px 30px;
-  background-color: ${props => props.$active ? theme.colors.primary : 'transparent'};
-  color: ${props => props.$active ? theme.colors.white : theme.colors.text};
+  background-color: ${(props) =>
+    props.$active ? theme.colors.primary : "transparent"};
+  color: ${(props) => (props.$active ? theme.colors.white : theme.colors.text)};
   border: none;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
-  font-weight: ${props => props.$active ? 'bold' : 'normal'};
+  font-weight: ${(props) => (props.$active ? "bold" : "normal")};
   &:hover {
-    background-color: ${props => props.$active ? theme.colors.primary : theme.colors.gray};
+    background-color: ${(props) =>
+      props.$active ? theme.colors.primary : theme.colors.gray};
   }
 `;
 
@@ -95,7 +103,8 @@ const OrderTitle = styled.h3`
 
 const OrderStatus = styled.span<{ $canceled: boolean }>`
   font-size: 16px;
-  color: ${props => props.$canceled ? theme.colors.error : theme.colors.text};
+  color: ${(props) =>
+    props.$canceled ? theme.colors.error : theme.colors.text};
   margin-left: 10px;
 `;
 
@@ -214,7 +223,9 @@ interface Pedido {
 }
 
 const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'solicitado' | 'capturado' | 'historial'>('solicitado');
+  const [activeTab, setActiveTab] = useState<
+    "solicitado" | "capturado" | "descargado" | "historial"
+  >("solicitado");
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -223,15 +234,15 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/login');
+      navigate("/login");
     } else {
       const storedUserInfo = getUserInfo();
-      if (storedUserInfo && storedUserInfo.rol === 'admin') {
+      if (storedUserInfo && storedUserInfo.rol === "admin") {
         setUserInfo(storedUserInfo);
         fetchPedidos();
       } else {
-        setError('Usuario no autorizado o información no encontrada.');
-        navigate('/login');
+        setError("Usuario no autorizado o información no encontrada.");
+        navigate("/login");
       }
     }
   }, [navigate]);
@@ -247,8 +258,10 @@ const AdminDashboard: React.FC = () => {
       const fetchedPedidos = await obtenerPedidos();
       setPedidos(fetchedPedidos);
     } catch (error) {
-      console.error('Error al obtener los pedidos:', error);
-      setError('No se pudieron cargar los pedidos. Por favor, intente de nuevo más tarde.');
+      console.error("Error al obtener los pedidos:", error);
+      setError(
+        "No se pudieron cargar los pedidos. Por favor, intente de nuevo más tarde."
+      );
     }
   };
 
@@ -258,19 +271,21 @@ const AdminDashboard: React.FC = () => {
       fetchPedidos();
       setOpenStatusMenu(null);
     } catch (error) {
-      console.error('Error al cambiar el estado del pedido:', error);
-      alert('Error al cambiar el estado del pedido. Por favor, intente de nuevo.');
+      console.error("Error al cambiar el estado del pedido:", error);
+      alert(
+        "Error al cambiar el estado del pedido. Por favor, intente de nuevo."
+      );
     }
   };
 
   const handleDeleteOrder = async (pedidoId: string) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este pedido?')) {
+    if (window.confirm("¿Estás seguro de que quieres eliminar este pedido?")) {
       try {
         await eliminarPedido(pedidoId);
         fetchPedidos();
       } catch (error) {
-        console.error('Error al eliminar el pedido:', error);
-        alert('Error al eliminar el pedido. Por favor, intente de nuevo.');
+        console.error("Error al eliminar el pedido:", error);
+        alert("Error al eliminar el pedido. Por favor, intente de nuevo.");
       }
     }
   };
@@ -280,8 +295,8 @@ const AdminDashboard: React.FC = () => {
       await cancelarPedido(pedidoId);
       fetchPedidos();
     } catch (error) {
-      console.error('Error al cancelar el pedido:', error);
-      alert('Error al cancelar el pedido. Por favor, intente de nuevo.');
+      console.error("Error al cancelar el pedido:", error);
+      alert("Error al cancelar el pedido. Por favor, intente de nuevo.");
     }
   };
 
@@ -290,18 +305,20 @@ const AdminDashboard: React.FC = () => {
       await reactivarPedido(pedidoId);
       fetchPedidos();
     } catch (error) {
-      console.error('Error al reactivar el pedido:', error);
-      alert('Error al reactivar el pedido. Por favor, intente de nuevo.');
+      console.error("Error al reactivar el pedido:", error);
+      alert("Error al reactivar el pedido. Por favor, intente de nuevo.");
     }
   };
 
-  const filteredPedidos = pedidos.filter(pedido => {
+  const filteredPedidos = pedidos.filter((pedido) => {
     switch (activeTab) {
-      case 'solicitado':
-        return pedido.estado === 'solicitado';
-      case 'capturado':
-        return ['capturado', 'descargado'].includes(pedido.estado);
-      case 'historial':
+      case "solicitado":
+        return pedido.estado === "solicitado";
+      case "capturado":
+        return pedido.estado === "capturado";
+      case "descargado":
+        return pedido.estado === "descargado";
+      case "historial":
         return true;
       default:
         return true;
@@ -317,9 +334,30 @@ const AdminDashboard: React.FC = () => {
         </Header>
         <Title>Panel de Administrador</Title>
         <TabContainer>
-          <Tab $active={activeTab === 'solicitado'} onClick={() => setActiveTab('solicitado')}>Solicitado</Tab>
-          <Tab $active={activeTab === 'capturado'} onClick={() => setActiveTab('capturado')}>Capturado</Tab>
-          <Tab $active={activeTab === 'historial'} onClick={() => setActiveTab('historial')}>Historial</Tab>
+          <Tab
+            $active={activeTab === "solicitado"}
+            onClick={() => setActiveTab("solicitado")}
+          >
+            Solicitado
+          </Tab>
+          <Tab
+            $active={activeTab === "descargado"}
+            onClick={() => setActiveTab("descargado")}
+          >
+            Descargado
+          </Tab>
+          <Tab
+            $active={activeTab === "capturado"}
+            onClick={() => setActiveTab("capturado")}
+          >
+            Capturado
+          </Tab>
+          <Tab
+            $active={activeTab === "historial"}
+            onClick={() => setActiveTab("historial")}
+          >
+            Historial
+          </Tab>
         </TabContainer>
         <OrderList>
           {filteredPedidos.map((pedido) => (
@@ -328,8 +366,7 @@ const AdminDashboard: React.FC = () => {
                 <OrderHeader>
                   <OrderTitle>Pedido - ID {pedido.id}</OrderTitle>
                   <OrderStatus $canceled={pedido.cancelado}>
-                    ({pedido.estado})
-                    {pedido.cancelado && ' (Cancelado)'}
+                    ({pedido.estado}){pedido.cancelado && " (Cancelado)"}
                   </OrderStatus>
                 </OrderHeader>
                 <OrderTable>
@@ -338,36 +375,60 @@ const AdminDashboard: React.FC = () => {
                   <TableHeader>Talla</TableHeader>
                   <TableHeader>Kilataje</TableHeader>
                   <TableHeader>Color</TableHeader>
-                  
+
                   <TableCell>{pedido.modelo}</TableCell>
                   <TableCell>{pedido.numero_piezas}</TableCell>
                   <TableCell>{pedido.talla}</TableCell>
                   <TableCell>{pedido.kilataje}</TableCell>
                   <TableCell>{pedido.color}</TableCell>
-                  
+
                   <TableHeader>Inicial</TableHeader>
                   <TableHeader>Nombre</TableHeader>
                   <TableHeader>Piedra</TableHeader>
                   <TableHeader>Largo</TableHeader>
                   <TableHeader>Observaciones</TableHeader>
-                  
+
                   <TableCell>{pedido.inicial}</TableCell>
                   <TableCell>{pedido.nombre_pedido}</TableCell>
                   <TableCell>{pedido.piedra}</TableCell>
                   <TableCell>{pedido.largo}</TableCell>
                   <ObservacionesCell>{pedido.observaciones}</ObservacionesCell>
                 </OrderTable>
-                </OrderContent>
+              </OrderContent>
               <ButtonContainer>
                 <StatusButtonContainer>
-                  <PrimaryButton onClick={() => setOpenStatusMenu(openStatusMenu === pedido.id ? null : pedido.id)}>
+                  <PrimaryButton
+                    onClick={() =>
+                      setOpenStatusMenu(
+                        openStatusMenu === pedido.id ? null : pedido.id
+                      )
+                    }
+                  >
                     Cambiar estado <ChevronDown size={16} />
                   </PrimaryButton>
                   {openStatusMenu === pedido.id && (
                     <StatusMenu>
-                      <StatusMenuItem onClick={() => handleChangeStatus(pedido.id, 'solicitado')}>Solicitado</StatusMenuItem>
-                      <StatusMenuItem onClick={() => handleChangeStatus(pedido.id, 'capturado')}>Capturado</StatusMenuItem>
-                      <StatusMenuItem onClick={() => handleChangeStatus(pedido.id, 'descargado')}>Descargado</StatusMenuItem>
+                      <StatusMenuItem
+                        onClick={() =>
+                          handleChangeStatus(pedido.id, "solicitado")
+                        }
+                      >
+                        Solicitado
+                      </StatusMenuItem>
+                      <StatusMenuItem
+                        onClick={() =>
+                          handleChangeStatus(pedido.id, "descargado")
+                        }
+                      >
+                        Descargado
+                      </StatusMenuItem>
+                      <StatusMenuItem
+                        onClick={() =>
+                          handleChangeStatus(pedido.id, "capturado")
+                        }
+                      >
+                        Capturado
+                      </StatusMenuItem>
                     </StatusMenu>
                   )}
                 </StatusButtonContainer>
@@ -375,7 +436,9 @@ const AdminDashboard: React.FC = () => {
                   Eliminar pedido
                 </SecondaryButton>
                 {pedido.cancelado ? (
-                  <PrimaryButton onClick={() => handleReactivateOrder(pedido.id)}>
+                  <PrimaryButton
+                    onClick={() => handleReactivateOrder(pedido.id)}
+                  >
                     Reactivar pedido
                   </PrimaryButton>
                 ) : (
